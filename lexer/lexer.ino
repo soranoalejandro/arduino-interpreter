@@ -1,28 +1,68 @@
 #include "lexer.h"
+String token = "";        // a String to hold incoming data
+bool _letter_, _upper_, _lower_, _digit_, _underscore_, _dollarsign_;
 
-//  COPY OF THE ARDUINO 'AnalogReadSerial' BASIC EXAMPLE FILE FROM THE IDE, will be modified for the initial tests
-
-const int analogInPin = A0;  // Analog input pin
-const int analogOutPin = 9; // Analog output pin
-int sensorValue = 0;    int outputValue = 0;    // value read from the pot, value output to the PWM (analog out)
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  token.reserve(200);
+  token = "";
+  // prints title with ending line break
+  Serial.println("\n\t\tArduino Interpreter - Lexer\n");
 }
 
 void loop() {
-  sensorValue = analogRead(analogInPin);
-  outputValue = map(sensorValue, 0, 1023, 0, 255);
-  analogWrite(analogOutPin, outputValue);
-  
-  // print the results to the Serial Monitor:
-  Serial.print("sensor = ");
-  Serial.print(sensorValue);
-  Serial.print("\t output = ");
-  Serial.print(outputValue);
-  Serial.print("OP code is:  '");
-  Serial.print(op);
-  Serial.println("'");
-  
-  delay(1200);
+  if (Serial.available()) {
+    char in = (char)Serial.read();
+    static char prev = 0;
+    char scan = lxScan( in );
+    if ( scan != prev ) {     //  new token, print type
+      if ( prev ) {           //  if previous token had data, reprint it, then clear the buffer
+        Serial.print("   length:   ");
+        Serial.print( token.length() );
+        Serial.print("   ");
+        Serial.print( token );
+        Serial.print("\n");
+      }
+      token = "";             //  save and discard array
+      if ( prev & (!scan) ) {           //  re-scan
+        scan = lxScan( in );
+      }
+      Serial.print("Type:   ");
+      switch ( scan ) {
+        case _sID_:
+        Serial.print("Identifier");
+        break;
+        case _sWS_:
+        Serial.print("Whitespace");
+        break;
+        case _sSY_:
+        Serial.print("Symbol    ");
+        break;
+        case _sNU_:
+        Serial.print("Number    ");
+        break;
+        default:
+        Serial.print("End       ");
+        break;
+      }
+      Serial.print("   ");
+      if ( !scan ) {
+        Serial.print("\n");
+      }
+    }
+    if ( scan ) {
+      token += in;
+      Serial.print(in);
+    }
+    prev = scan;
+  }
+  delay(500);
 }
+
+//void serialEvent() {
+//  
+//}

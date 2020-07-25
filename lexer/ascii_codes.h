@@ -1,9 +1,9 @@
 //    characters that the lexer will recognize form the input language
 
 #define sp ' '    //  space
-#define nl '\n'   //  new line
 #define tb '\t'   //  tab
 
+#define nl '\n'   //  new line
 #define cr '\r'   //  carriage return
 #define sc ';'    //  semicolon
 
