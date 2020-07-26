@@ -32,7 +32,6 @@
 #define bs '\\'   //  back slash
 #define pe '%'    //  modulo, percent
 
-#define ds '$'    //  dollar sign
 #define as '&'    //  ampers and
 #define pi '|'    //  pipe
 #define hy '^'    //  hyphen
