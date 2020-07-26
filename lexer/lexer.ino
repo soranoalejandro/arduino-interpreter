@@ -2,7 +2,6 @@
 String token = "";        // a String to hold incoming data
 bool _letter_, _upper_, _lower_, _digit_, _underscore_, _dollarsign_;
 
-
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
@@ -22,7 +21,9 @@ void loop() {
     if ( scan != prev ) {     //  new token, print type
       token = "";             //  save and discard array
       if ( (prev != 0) & (prev != _sNL_)& (prev != _sWS_) ) {
-        Serial.print("   ");
+        if ( scan != _sSTR_END_ ) {
+          Serial.print("   ");
+        }
       }
       switch ( scan ) {
         case _sID_:
@@ -37,21 +38,29 @@ void loop() {
         case _sSY_:
         Serial.print("SYM");
         break;
-        case _sNU_:
+        case _sNUM_:
         Serial.print("NUM");
+        break;
+        case _sSTR_:
+        Serial.print("STR");
+        break;
+        case _sSTR_END_:
         break;
         default:
         Serial.print("???   ");
         break;
       }
-      if ( (scan == _sID_) | (scan == _sNU_) | (scan == _sSY_) ) {
+      if ( (scan == _sID_) | (scan == _sNUM_) | (scan == _sSY_) | (scan == _sSTR_) ) {
         Serial.print(" ");
       }
       if ( !scan | ( scan == _sNL_ ) ) {
         Serial.print("\n");
       }
     }
-    if ( (scan == _sID_) | (scan == _sNU_) | (scan == _sSY_) ) {
+    if ( (scan == _sID_) | (scan == _sNUM_) | (scan == _sSY_) ) {
+      token += in;
+      Serial.print(in);
+    } else if ( (scan == _sSTR_) | (scan == _sSTR_END_) ) {
       token += in;
       Serial.print(in);
     }
