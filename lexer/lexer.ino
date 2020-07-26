@@ -20,49 +20,42 @@ void loop() {
     static char prev = 0;
     char scan = lxScan( in );
     if ( scan != prev ) {     //  new token, print type
-      if ( prev ) {           //  if previous token had data, reprint it, then clear the buffer
-        Serial.print("   length:   ");
-        Serial.print( token.length() );
-        Serial.print("   ");
-        Serial.print( token );
-        Serial.print("\n");
-      }
       token = "";             //  save and discard array
-      if ( prev & (!scan) ) {           //  re-scan
-        scan = lxScan( in );
+      if ( (prev != 0) & (prev != _sNL_)& (prev != _sWS_) ) {
+        Serial.print("   ");
       }
-      Serial.print("Type:   ");
       switch ( scan ) {
         case _sID_:
-        Serial.print("Identifier");
+        Serial.print("ID");
         break;
         case _sWS_:
-        Serial.print("Whitespace");
+        //Serial.print("");
+        break;
+        case _sNL_:
+        //Serial.print("LINE\n");
         break;
         case _sSY_:
-        Serial.print("Symbol    ");
+        Serial.print("SYM");
         break;
         case _sNU_:
-        Serial.print("Number    ");
+        Serial.print("NUM");
         break;
         default:
-        Serial.print("End       ");
+        Serial.print("???   ");
         break;
       }
-      Serial.print("   ");
-      if ( !scan ) {
+      if ( (scan == _sID_) | (scan == _sNU_) | (scan == _sSY_) ) {
+        Serial.print(" ");
+      }
+      if ( !scan | ( scan == _sNL_ ) ) {
         Serial.print("\n");
       }
     }
-    if ( scan ) {
+    if ( (scan == _sID_) | (scan == _sNU_) | (scan == _sSY_) ) {
       token += in;
       Serial.print(in);
     }
     prev = scan;
   }
-  delay(500);
+  //delay(20);
 }
-
-//void serialEvent() {
-//  
-//}
