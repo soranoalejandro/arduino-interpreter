@@ -40,3 +40,4 @@
 #define at '@'    //  at character
 #define qm '?'    //  question mark
 #define ds '$'    //  dollar sign
+#define bg '!'    //  bang

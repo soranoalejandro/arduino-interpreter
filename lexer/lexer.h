@@ -11,7 +11,7 @@
 #include "keywordsJS.h"
 #include "LX_token_types.h"
 
-
+//  repetitive instructions, need them to be INLINE FUNTIONS but arduino compiler still refuses
 #define daXorE(d) Xor ^= d;  Sum += d;  tk[indx++] = d;  ++cnt
 #define daXorL(d) Xor ^= d;  Sum += d;  data[cnt++] = d
 #define daStaE(d) tk[indx++] = d;  ++cnt
@@ -25,6 +25,7 @@
 #define tkStrL(t) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0;  scanType = t;  return t;}
 #define tkIdL(t, d) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0;  daXorE(d);  scanType = t;  return t;}
 
+
 static char data[14];
 static byte scanType = _sUK_;
 static byte cnt = 0;
@@ -35,16 +36,22 @@ static char quote = 0;
         //    FUNCTIONS
 
 //  SCAN function
-inline char lxScan( char c );
+inline char lx_scan( char c );
+//  SCAN function code to string (for testing and debuggin purposes)
+inline void lx_print_code( char c );
 
-
+// _sLC_ 10        _sUC_ 11        _sID_ 12
+// _sWS_ 13        _sNL_ 14        _sSE_ 15
+// _sNUM_ 16       _sSTR_ 17       _sSTR_END_ 18     _sSTT_ 19        _sBSL_ 20
         //    FUNCTION DEFINITIONS
 
-inline char lxScan( char c ) {
+inline char lx_scan( char c ) {
    
   //  ignores character hex 00
   if ( c ) {
-    
+    // _sLC_ 10        _sUC_ 11        _sID_ 12
+    // _sWS_ 13        _sNL_ 14        _sSE_ 15
+    // _sNUM_ 16       _sSTR_ 17       _sSTR_END_ 18     _sSTT_ 19        _sBSL_ 20
     //  is expecting a middle character of recognized type
     if ( scanType ) {
       if ( scanType == _sID_ ) {
@@ -80,7 +87,7 @@ inline char lxScan( char c ) {
           tkPass( _sSE_, c )
         //  is | bitwise operator
         if ( c == pi ) tkPass( _sBWO_, c) //  'or' bitwise operator
-        tkPass( _sSY4_, c )               //  symbol 4, '~'
+        tkPass( _sBWO_, c )               //  not '~' bitwise operator
       }
       
       //  then it is ascii extended character
@@ -98,7 +105,7 @@ inline char lxScan( char c ) {
       if ( c == us ) tkIdL ( _sID_, c )   //  underscore, valid JS or PY identifier
       if ( c == ca ) tkPass( _sBWO_, c )  //  'xor' bitwise operator
       if ( c == bt ) tkCode( _sSTT_ )     //  JS string template
-      tkPass ( _sSY3_, c )                //  symbol 3, '\'
+      tkCode( _sBSL_ )                    //  '\' backslash escape sequence
     }
 
     //  is digit or symbol 2
@@ -117,7 +124,7 @@ inline char lxScan( char c ) {
       //  symbol 2 greater tha equal sign
       if ( c == gt ) tkPass( _sCMP_, c )    //  compare operator
       if ( c == qm ) tkCode( _sQST_ )       //  question mark
-      tkPass( _sSY2_, c )                   //  symbol 2, '@'
+      tkPass( _sSYM_, c )                   //  symbol 2, '@'
     }
 
     //  is symbol 1
@@ -139,8 +146,9 @@ inline char lxScan( char c ) {
       //  amperes and
       if ( c == aa ) tkPass( _sBWO_, c )    //  bitwise operator
       if ( c == ds ) tkIdL( _sID_, c )      //  dollar sign, valid identifier
-        
-      tkPass( _sSY1_, c );                  //  symbol 1, '!' '#' '%'
+      if ( c == bg ) tkPass( _sBWO_, c )    //  '!' bitwise operator
+      if ( c == pe ) tkPass( _sMTH_, c )    //  '%' basic math operator
+      tkPass( _sSYM_, c );                  //  symbol 1, '#'
     }
     
     // is space or lower control character
@@ -153,4 +161,8 @@ inline char lxScan( char c ) {
   }
   //  character hex 00
   return _sUK_;
+}
+
+inline void lx_print_code( char c ) {
+  return;
 }
