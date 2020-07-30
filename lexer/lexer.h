@@ -22,7 +22,7 @@
 #define tkReduce(t) {tk[indx++] = t;  scanType = t;  return t;}
 #define tkcnt(t) {cnt = 0;  tk[indx++] = t; scanType = t;  return t;}
 #define tkNumL(t, d) {tk[indx++] = t;  cnt = 0;  daStaE(d);  scanType = t;  return t;}
-#define tkStrL(t) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0;  scanType = t;  return t;}
+#define tkStrL(t, q) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0; quote = q;  scanType = t;  return t;}
 #define tkIdL(t, d) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0;  daXorE(d);  scanType = t;  return t;}
 
 
@@ -49,21 +49,55 @@ inline char lx_scan( char c ) {
    
   //  ignores character hex 00
   if ( c ) {
-    // _sLC_ 10        _sUC_ 11        _sID_ 12
-    // _sWS_ 13        _sNL_ 14        _sSE_ 15
-    // _sNUM_ 16       _sSTR_ 17       _sSTR_END_ 18     _sSTT_ 19        _sBSL_ 20
+    
     //  is expecting a middle character of recognized type
     if ( scanType ) {
-      if ( scanType == _sID_ ) {
-        if ( _an_(c) || _id_sy_(c) ) {
-          daXorE(c);  return _sID_; }
-      } else if ( scanType == _sWS_ ) {
-        if ( _ws_(c)) return _sWS_;
-      } else if ( scanType == _sNL_ ) {
-        if ( _nl_(c)) return _sNL_;
-      } else if ( scanType == _sNUM_ ) {
-        if ( _nu_(c)) {
-          daStaE(c);  return _sNUM_; }
+      //  is lowercase, uppercase or identifier?
+      // _sLC_ 10        _sUC_ 11        _sID_ 12
+      if ( scanType < _sWS_ ) {
+        if ( scanType == _sLC_ ) {              //  lowercase
+          if ( _lo_(c) ) {
+            //daXorE(c);  
+            return _sLC_; }
+        } else if ( scanType == _sUC_ ) {       //  uppercase
+          if ( _up_(c) ) {
+            //daXorE(c);  
+            return _sUC_; }
+        }
+        //  identifier
+        if ( scanType == _sID_ ) {
+          if ( _an_(c) || _id_sy_(c) ) {        //  identifier
+            //daXorE(c);  
+            return _sID_; }
+        }
+      }
+      //  is white space, separator or new line
+      // _sWS_ 13        _sNL_ 14        _sSE_ 15
+      else if ( scanType < _sNUM_ ) {
+        if ( scanType == _sWS_ ) {
+          if ( _ws_(c)) return _sWS_;           //  whitespace
+        } else if ( scanType == _sNL_ ) {
+          if ( _nl_(c)) return _sNL_;           //  new line
+        }
+      }
+      //  is number literal, string literal or template string
+      // _sNUM_ 16       _sSTR_ 17       _sSTR_END_ 18     _sSTT_ 19        _sBSL_ 20
+      else {
+        if ( scanType == _sNUM_ ) {
+          if ( _nu_(c)) return _sNUM_;           //  number literal
+        } else if ( scanType == _sSTR_ ) {
+          if ( _pr_(c)) {
+            if ( c == quote) return _sSTR_END_;  //  string end
+            return _sSTR_;                       //  string contents
+          }
+        }
+        //  javascript template literal `content{expression}`
+        else if ( scanType == _sSTT_ ) {
+          if ( _pr_(c)) {
+            if ( c == bt) return _sSTR_END_;     //  string end
+            return _sSTT_;                       //  string contents
+          }
+        }
       }
     }
     
@@ -142,7 +176,7 @@ inline char lx_scan( char c ) {
       //  symbol 1 lower than equal sign
       //  single and double quotes ', "
       if ( (c == qt) || (c == dq) )         //  string literal
-        tkStrL( _sSTR_ )
+        tkStrL( _sSTR_, c )   // pass the single or double quote as parameter
       //  amperes and
       if ( c == aa ) tkPass( _sBWO_, c )    //  bitwise operator
       if ( c == ds ) tkIdL( _sID_, c )      //  dollar sign, valid identifier

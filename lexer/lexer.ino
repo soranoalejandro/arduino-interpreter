@@ -119,9 +119,9 @@ void loop() {
         Serial.print(val);
       } else {
         if ( val == _sNL_ ) {
-          Serial.println(" ");
+          Serial.println("\n");
         } else {
-          Serial.print(" ");
+          Serial.print(".");
         }
       }
     }
