@@ -1,4 +1,6 @@
-//    characters that the lexer will recognize form the input language
+/* shortnames for the characters that the lexer
+ * will recognize form the input language
+ */
 
 #define sp ' '    //  space
 #define tb '\t'   //  tab
@@ -10,12 +12,12 @@
 #define cl ':'    //  colon
 #define dt '.'    //  dot
 #define cm ','    //  comma
-#define ob '{'    //  open curly brace
-#define cb '}'    //  close curly brace
-#define os '['    //  open square brace
-#define cs ']'    //  close square brace
-#define op '('    //  open parenthesis
-#define cp ')'    //  close parenthesis
+#define lc '{'    //  left curly brace
+#define rc '}'    //  right curly brace
+#define lb '['    //  left square brace
+#define rb ']'    //  right square brace
+#define lp '('    //  left parenthesis
+#define rp ')'    //  right parenthesis
 
 #define qt '\''   //  single quote
 #define dq '\"'   //  double quote
@@ -25,14 +27,16 @@
 #define gt '>'    //  greater than
 #define lt '<'    //  less than
 #define pl '+'    //  plus
-#define mi '-'    //  minus, dash
-#define ld '_'    //  low dash
-#define mu '*'    //  multiply, asterisk
-#define di '/'    //  divide, slash
+#define hy '-'    //  hyphen, dash
+#define us '_'    //  underscore, low dash
+#define ak '*'    //  multiply, asterisk
+#define sl '/'    //  divide, slash
 #define bs '\\'   //  back slash
 #define pe '%'    //  modulo, percent
 
-#define as '&'    //  ampers and
+#define aa '&'    //  amperes and
 #define pi '|'    //  pipe
-#define hy '^'    //  hyphen
+#define ca '^'    //  caret
 #define at '@'    //  at character
+#define qm '?'    //  question mark
+#define ds '$'    //  dollar sign

@@ -27,16 +27,13 @@
 #define _k56 "super"
 #define _k44 "this"
 #define _k63 "import"
-
   //  LITERALS
 #define _k45 "null"
 #define _k46 "true"
 #define _k57 "false"
-
   //  MODULE
 #define _k58 "await"
 #define _k59 "async"
-
   //  STRICT MODE
 #define _k34 "let"
 #define _k64 "static"

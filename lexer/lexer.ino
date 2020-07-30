@@ -1,99 +1,313 @@
+/* test program for the lexer scanner and lexer evaluator
+ * 
+ * Alejando Solano, July 2020.
+ */
+
+//  IMPORTANT, max size of the ram buffer for this test
+//  set it to aprox 60% of your board total dynamic memory (RAM)
+
+#define TEST_BUFFER_SZ 5000
+#define TEST_SERIAL_BAUDRATE 19200
+
+//  USE CASE
+//  send source code thought the Arduino serial monitor (terminal)
+
+//  TEST FOR SPEED
+//  you may send a file of any arbitrary size (even greater than the buffer)
+//  this will test the speed of the scanner stage of the lexer (still under development)
+//  for a graphical representation of the processing use the previous commit '2dn test' of his repository
+
+//  test any c, python, javascript... existing source code files, open libraries are good candidates.
+
+
+unsigned long stamp, lastChar;
+unsigned indx = 0;
+char tk[TEST_BUFFER_SZ];        // a String to hold incoming data
 #include "lexer.h"
-String token = "";        // a String to hold incoming data
-bool _letter_, _upper_, _lower_, _digit_, _underscore_, _dollarsign_;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(TEST_SERIAL_BAUDRATE);
   while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
+    ; // wait for serial port to connect.
   }
-  token.reserve(200);
-  token = "";
   // prints title with ending line break
-  Serial.println("\n\t\tArduino Interpreter - Lexer\n");
+  Serial.println("\n\t\tArduino Interpreter - Lexer");
 }
+
+unsigned int count, maxCount;
+char in, scan;
+unsigned long elapsed, maxElapsed;
 
 void loop() {
-  if (Serial.available()) {
-    char in = (char)Serial.read();
-    static char prev = 0;
-    char scan = lxScan( in );
-    if ( scan != prev ) {     //  new token, print type
-<<<<<<< HEAD
-      token = "";             //  save and discard array
-      if ( (prev != 0) & (prev != _sNL_)& (prev != _sWS_) ) {
-        if ( scan != _sSTR_END_ ) {
-          Serial.print("   ");
-        }
-=======
-      if ( prev ) {           //  if previous token had data, reprint it, then clear the buffer
-        Serial.print("   length:   ");
-        Serial.print( token.length() );
-        Serial.print("   ");
-        Serial.print( token );
-        Serial.print("\n");
-      }
-      token = "";             //  save and discard array
-      if ( prev & (!scan) ) {           //  re-scan
-        scan = lxScan( in );
->>>>>>> parent of 9574ce6... 2nd test, recognizes Id, number, ws, nl, symbol
-      }
-      Serial.print("Type:   ");
-      switch ( scan ) {
-        case _sID_:
-        Serial.print("Identifier");
-        break;
-        case _sWS_:
-        Serial.print("Whitespace");
-        break;
-        case _sSY_:
-        Serial.print("Symbol    ");
-        break;
-<<<<<<< HEAD
-        case _sNUM_:
-        Serial.print("NUM");
-=======
-        case _sNU_:
-        Serial.print("Number    ");
->>>>>>> parent of 9574ce6... 2nd test, recognizes Id, number, ws, nl, symbol
-        break;
-        case _sSTR_:
-        Serial.print("STR");
-        break;
-        case _sSTR_END_:
-        break;
-        default:
-        Serial.print("End       ");
-        break;
-      }
-<<<<<<< HEAD
-      if ( (scan == _sID_) | (scan == _sNUM_) | (scan == _sSY_) | (scan == _sSTR_) ) {
-        Serial.print(" ");
-      }
-      if ( !scan | ( scan == _sNL_ ) ) {
-        Serial.print("\n");
-      }
+  byte cc;
+  byte bu[30];
+  cc = Serial.available();
+  if (cc > 19) {
+    cc = 20;
+    maxCount += cc;
+    //  load incomming chars into a buffer
+    for (byte i = 0; i < cc; i++) {
+      bu[i] = (char)Serial.read();
     }
-    if ( (scan == _sID_) | (scan == _sNUM_) | (scan == _sSY_) ) {
-      token += in;
-      Serial.print(in);
-    } else if ( (scan == _sSTR_) | (scan == _sSTR_END_) ) {
-=======
-      Serial.print("   ");
-      if ( !scan ) {
-        Serial.print("\n");
-      }
+    cc = 0;
+    stamp = micros();   //  record start time
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    lxScan(bu[cc++]);
+    //  record time of last character processeed
+    lastChar = micros();
+    elapsed = lastChar - stamp;
+    //  add to incremental processing time value
+    maxElapsed += elapsed;
+    
+    //  mark a new start (this time in milliseconds
+    //  for the 400ms second automatic end of file detection
+    elapsed = lastChar - stamp;
+    lastChar = millis();
+    
+    //  if buffer is about to be overrrun 
+    if (indx > (TEST_BUFFER_SZ - 100) ) {
+      indx = 0;   //  reset the buffer
     }
-    if ( scan ) {
->>>>>>> parent of 9574ce6... 2nd test, recognizes Id, number, ws, nl, symbol
-      token += in;
-      Serial.print(in);
-    }
-    prev = scan;
   }
-  delay(500);
-}
 
-//void serialEvent() {
+
+  //  automatic end of file detecton timer
+  elapsed = millis();
+  elapsed -= lastChar;
+
+  //  end of file detected
+  if ( (elapsed > 400L) && (indx > 0) ) {
+    //  print the buffer, SCAN CODES will only show a '.'
+    char val;
+    for (int n = 0; (n < indx) ; n++) {
+      val = tk[n];
+      if ( val > 32) {
+        Serial.print(val);
+      } else {
+        Serial.print(".");
+      }
+    }
+
+    //  print inpud file and generated byte sizes
+    Serial.println("\n");
+    Serial.print(maxCount);
+    Serial.println(" in Bytes");
+    Serial.print(indx);
+    Serial.println(" out Bytes");
+    Serial.print(maxElapsed);
+    Serial.println(" us.\n");
+
+    //  calculate and print SCANNER average speed
+    //  of input stream
+    float fl;
+    fl = maxCount * 8u;
+    fl /= maxElapsed;
+    Serial.print(fl);
+    Serial.print(" Mib/s  /  ");
+    fl *= 125;
+    Serial.print(fl);
+    Serial.println(" KByte/s  in");
+    //  of output stream
+    fl = indx * 8u;
+    fl /= maxElapsed;
+    Serial.print(fl);
+    Serial.print(" Mib/s  /  ");
+    fl *= 125;
+    Serial.print(fl);
+    Serial.println(" KByte/s  out\n");
+    indx = 0;
+    maxCount = 0;
+    maxElapsed = 0;
+  }
+}
+    
+//  //  more than one byte in the buffer
 //  
-//}
+//  if (blen > 0) {
+//    //  2 seconds since last character received
+//    elapsed = millis();
+//    elapsed = elapsed - lastChar;
+//    if ( elapsed > 2000L ) {
+//      //  process the data in the SCANNER
+//      prev = 0;
+//      tlen = 0;
+//      stamp = micros();   //  record start time
+//      for ( count = 0; count < blen; count++ ) {
+//        in = bu[count];
+//        scan = lxScan(in);
+//        tk[tlen++] = scan;
+//        //tk[tlen++] = in;
+//      }
+//      tk[tlen] = (char)0;
+//      stamp = micros() - stamp;
+//      Serial.print(stamp);
+//      Serial.println(" us.");
+//
+//      prev = 0;
+//      tlen = 0;
+//      stamp = micros();   //  record start time
+//      for ( count = 0; count < blen; count++ ) {
+//        in = bu[count];
+//        scan = lxScan(in);
+//        if ( scan != prev ) {
+//          //tk[tlen] = scan;
+//          tk[tlen++] = '\n';
+//          switch (scan) {
+//            case _sID_:
+//            tk[tlen++] = 'I';
+//            tk[tlen++] = 'D';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = ' ';
+//            break;
+//            case _sLC_:
+//            tk[tlen++] = 'L';
+//            tk[tlen++] = 'C';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = ' ';
+//            break;
+//            case _sUC_:
+//            tk[tlen++] = 'U';
+//            tk[tlen++] = 'C';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = ' ';
+//            break;
+//            case _sWS_:
+//            //tk += "WS  ";
+//            break;
+//            case _sNL_:
+//            //tk += "NL  ";
+//            break;
+//            case _sSE_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'E';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sNUM_:
+//            tk[tlen++] = 'N';
+//            tk[tlen++] = 'U';
+//            tk[tlen++] = 'M';
+//            tk[tlen++] = ' ';
+//            break;
+//            case _sSTR_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'T';
+//            tk[tlen++] = 'R';
+//            tk[tlen++] = ' ';
+//            break;
+//            case _sSTR_END_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'T';
+//            tk[tlen++] = 'R';
+//            tk[tlen++] = 'E';
+//            tk[tlen++] = 'N';
+//            tk[tlen++] = 'D';
+//            break;
+//            case _sEXT_:
+//            tk[tlen++] = 'E';
+//            tk[tlen++] = 'X';
+//            tk[tlen++] = 'T';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sEQ_:
+//            tk[tlen++] = 'E';
+//            tk[tlen++] = 'Q';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sSY1_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'Y';
+//            tk[tlen++] = '1';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sSY2_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'Y';
+//            tk[tlen++] = '2';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sSY3_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'Y';
+//            tk[tlen++] = '3';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sSY4_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'Y';
+//            tk[tlen++] = '4';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sSYM_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'Y';
+//            tk[tlen++] = 'M';
+//            tk[tlen++] = ' ';
+//            tk[tlen++] = in;
+//            scan = _sUK_;
+//            break;
+//            case _sSTART_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'T';
+//            tk[tlen++] = 'A';
+//            tk[tlen++] = 'R';
+//            tk[tlen++] = 'T';
+//            break;
+//            case _sSTOP_:
+//            tk[tlen++] = 'S';
+//            tk[tlen++] = 'T';
+//            tk[tlen++] = 'O';
+//            tk[tlen++] = 'P';
+//            break;
+//          }
+//        }
+//        prev = scan;
+//        tk[tlen] = in;
+//        tlen += 1;
+//      }
+//      tk[tlen] = (char)0;
+//      stamp = micros() - stamp;
+//      Serial.print(stamp);
+//      Serial.println(" us.");
+//      
+//      Serial.println(tk);
+//      
+//      blen = 0;
+//      tlen = 0;
+//    }
+//  }
+//  delay(500);
+//  }
