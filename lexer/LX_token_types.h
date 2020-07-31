@@ -4,9 +4,10 @@
 #define _sUK_ 0       //  Unknown character
 #define _sSTART_ 2    //  Start of file
 #define _sSTOP_ 3     //  End of file
-#define _sEQ_ 5       //  equal sign
-#define _sDOT_ 6      //  dot sign
-#define _sCM_ 7       //  comma
+#define _sCMN_ 4      //  Comment or '/' math operator
+#define _sEQ_ 7       //  equal sign
+#define _sDOT_ 8      //  dot sign
+#define _sCM_ 9       //  comma
 #define _sLC_ 10      //  all lowercase string, and potential JS keyword to be identified by lexer
 #define _sUC_ 11      //  all uppercase string, and potential PY keyword to be identified by lexer
 #define _sID_ 12      //  valid JS variable name, has [_,$,az,AZ,09,] can't start with numbers
@@ -15,7 +16,7 @@
 #define _sSE_ 15      //  separator { } [ ] ( ) ; and ,
 #define _sNUM_ 16     //  number literal
 #define _sSTR_ 17     //  string literal between single or double quotes '...' or "..."
-#define _sSTR_END_ 18   //  correct string termination character, can be ' or "
+#define _sSTR_END_ 18 //  correct string termination character, can be ' or "
 #define _sSTT_ 19     //  string template
 #define _sBSL_ 20     //  Back slash escape sequence
 #define _sBWO_ 25     //  bitwise operator

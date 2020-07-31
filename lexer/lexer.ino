@@ -9,8 +9,8 @@
 #define TEST_BUFFER_SZ  5000
 
 //  Console baudrate
-#define TEST_SERIAL_BAUDRATE  1000000
-//  Automatic end of file detection time in milliseconds - defaul
+#define TEST_SERIAL_BAUDRATE  230400
+//  Automatic end of file detection time in milliseconds - default
 #define TEST_AUTO_END_TIME  400
 
 //  USE CASE
@@ -28,7 +28,7 @@ unsigned long stamp, lastChar;
 unsigned long elapsed, time_us;
 
 char tk[TEST_BUFFER_SZ];      //  an ARRAY to hold generated -outgoing- data
-unsigned int indx = 0;            //  current index of outgoing data buffer
+unsigned indx = 0;            //  current index of outgoing data buffer
 
 //  include the LEXER code to test it (mus have acces to the 2 variables above)
 #include "lexer.h"
@@ -105,7 +105,7 @@ void loop() {
   }
 
 
-  //  automatic end of file detecton timer
+  //  automatic end of file detecton timer1
   elapsed = millis();
   elapsed -= lastChar;
 
@@ -136,11 +136,11 @@ void loop() {
     float f;
     
     //  of input stream
-    f = (float)inCount * 8u;  f /= (float)time_us;  Serial.print(f);  Serial.print(" Mib/s  /  ");
+    f = (float)(inCount * 8L);  f /= (float)time_us;  Serial.print(f);  Serial.print(" Mib/s  /  ");
     f = (float)inCount;  f *= 1000.0;  f /= (float)time_us;  Serial.print(f);  Serial.println(" KByte/s  in");
     
     //  of output stream
-    f = (float)outCount * 8u; f /= (float)time_us;  Serial.print(f);  Serial.print(" Mib/s  /  ");
+    f = (float)(outCount * 8L); f /= (float)time_us;  Serial.print(f);  Serial.print(" Mib/s  /  ");
     f = (float)outCount;  f *= 1000.0;  f /= (float)time_us;  Serial.print(f);  Serial.println(" KByte/s  out\n");
 
     //  reset buffer index,  

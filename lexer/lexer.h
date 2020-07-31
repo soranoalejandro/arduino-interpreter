@@ -17,12 +17,15 @@
 #define daStaE(d) tk[indx++] = d;  ++cnt
 #define daStaL(d) data[cnt++] = d
 #define daPass(d) tk[indx++] = d
+#define tkWait(t, s) {stop_c = s;  scanType = t;  return t;}
 #define tkCode(t) {tk[indx++] = t;  return t;}
+#define tkLateCode(t, n) {tk[indx++] = t;  scanType = n;}    //  set late code and next step to scan
+#define tkLateCodeData(t, d, n) {tk[indx++] = t;  daPass(d);  scanType = n;}    //  late code, data and next step to scan
 #define tkPass(t, d) {tk[indx++] = t;  daPass(d);  return t;}
 #define tkReduce(t) {tk[indx++] = t;  scanType = t;  return t;}
 #define tkcnt(t) {cnt = 0;  tk[indx++] = t; scanType = t;  return t;}
 #define tkNumL(t, d) {tk[indx++] = t;  cnt = 0;  daStaE(d);  scanType = t;  return t;}
-#define tkStrL(t, q) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0; quote = q;  scanType = t;  return t;}
+#define tkStrL(t, q) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0; stop_c = q;  scanType = t;  return t;}
 #define tkIdL(t, d) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0;  daXorE(d);  scanType = t;  return t;}
 
 
@@ -31,7 +34,7 @@ static byte scanType = _sUK_;
 static byte cnt = 0;
 static byte Xor = 0;
 static byte Sum = 0;
-static char quote = 0;
+static char stop_c = 0;
 
         //    FUNCTIONS
 
@@ -67,7 +70,7 @@ inline char lx_scan( char c ) {
         //  identifier
         if ( scanType == _sID_ ) {
           if ( _an_(c) || _id_sy_(c) ) {        //  identifier
-            //daXorE(c);  
+            //daXorE(c);
             return _sID_; }
         }
       }
@@ -87,7 +90,10 @@ inline char lx_scan( char c ) {
           if ( _nu_(c)) return _sNUM_;           //  number literal
         } else if ( scanType == _sSTR_ ) {
           if ( _pr_(c)) {
-            if ( c == quote) return _sSTR_END_;  //  string end
+            if ( c == stop_c) {
+              scanType = _sUK_;
+              tkCode(_sSTR_END_)                 //  string end
+            }
             return _sSTR_;                       //  string contents
           }
         }
@@ -96,6 +102,21 @@ inline char lx_scan( char c ) {
           if ( _pr_(c)) {
             if ( c == bt) return _sSTR_END_;     //  string end
             return _sSTT_;                       //  string contents
+          }
+        //  other dubious operators _sCMN_  comments by example
+        } else {
+          //  SLASH or COMMENT
+          if ( _sCMN_ ) {
+            if ( !stop_c ) {    //  without a stop character
+              //  slash, is single line comment, wait new line to stop
+              if ( c == sl ) tkWait( _sCMN_, nl )
+              //  multiline comment
+              tkLateCodeData( _sMTH_, sl, _sUK_ ) }   //  was a slash / divide math operator
+            else {              //  wait for new line to end single line comment
+              if ( stop_c == nl && _nl_(c) ) {      //  new line, end comment
+                tkReduce( _sNL_ )        //  new line
+              }
+            }
           }
         }
       }
@@ -171,6 +192,7 @@ inline char lx_scan( char c ) {
           tkPass( _sSE_, c )
         if ( c == dt ) tkCode( _sDOT_ )     //  dot sign
         if ( c == cm ) tkCode( _sCM_ )      //  comma
+        if ( c == sl ) tkWait( _sCMN_, 0 )  //  slash, possible comment
         tkPass( _sMTH_, c )                 //  basic math operator
       }
       //  symbol 1 lower than equal sign
