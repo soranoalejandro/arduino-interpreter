@@ -19,9 +19,9 @@
 //  RANGE and multi range comparators, ex: 'is alphanumeric'.
 
 //  Will be used less whenever possible because range are slower than limits
-#define _lo_(x) (x < '{' & x > '`')   //  lower case range
-#define _up_(x) (x < '[' & x > '@')   //  upper case range
-#define _nu_(x) (x < ':' & x > '/')   //  digits range
+#define _lo_(x) ((x < '{') & (x > '`'))   //  lower case range
+#define _up_(x) ((x < '[') && (x > '@'))   //  upper case range
+#define _nu_(x) ((x < ':') && (x > '/'))   //  digits range
 #define _al_(x) (_lo_(x) || _up_(x))   //  letters -upper and lower case- range
 #define _an_(x) (_al_(x) || _nu_(x))   //  alphanumeric range -upper, lower and digits
 #define _id_sy_(x) ((x == us) || (x == ds)) //  extra JS id symbols '_' and '$'
@@ -29,9 +29,9 @@
 #define _nl_(x) ((x == nl) || (x == cr))    //  new line symbols
 #define _stx_(x) (x == 2)                   //  start of text
 #define _etx_(x) (x == 3)                   //  end of text
-#define _sy1_(x) (x < '0' & x > sp)   //  symbols range 1
-#define _sy2_(x) (x < 'A' & x > '9')  //  symbols range 2
-#define _sy3_(x) (x < 'a' & x > 'Z')  //  symbols range 3
-#define _sy4_(x) (x < 127 & x > 'z')  //  symbols range 4
+#define _sy1_(x) ((x < '0') && (x > sp))   //  symbols range 1
+#define _sy2_(x) ((x < 'A') && (x > '9'))  //  symbols range 2
+#define _sy3_(x) ((x < 'a') && (x > 'Z'))  //  symbols range 3
+#define _sy4_(x) ((x < 127) && (x > 'z'))  //  symbols range 4
 #define _sy_(x) (_sy1_(x) || _sy2_(x) || _sy3_(x) || _sy4_(x))  //  symbols range ALL
-#define _pr_(x) (x < 127 & x > 31)    //  printable characters
+#define _pr_(x) ((x < 127) & (x > 31))    //  printable characters

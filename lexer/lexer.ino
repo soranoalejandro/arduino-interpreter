@@ -6,12 +6,12 @@
 //  IMPORTANT, max size of the ram buffer for this test
 //  set it to aprox 65% of your board total memory (RAM)
 
-#define TEST_BUFFER_SZ  5000
+#define TEST_BUFFER_SZ  5500
 
 //  Console baudrate
 #define TEST_SERIAL_BAUDRATE  230400
 //  Automatic end of file detection time in milliseconds - default
-#define TEST_AUTO_END_TIME  400
+#define TEST_AUTO_END_TIME  2900
 
 //  USE CASE
 //  send source code thought the Arduino serial monitor (terminal)
@@ -53,7 +53,7 @@ void loop() {
   byte cc;
   byte bu[30];
   cc = Serial.available();
-  if (cc > 19) {
+  if ( cc > 19 ) {
     //  set bytes to load = 20. 
     cc = 20;
     //  add 20 to total in bytes counter
@@ -115,13 +115,18 @@ void loop() {
     char val;
     for (unsigned int n = 0; (n < indx) ; n++) {
       val = tk[n];
-      if ( val > 32) {
+      if ( val < 32) {
+        if ( ( val != _sWS_ ) && ( val != _sNL_ ) && ( val != _sCMN_ ) )
+        
+        lx_print_code(val);
+      } 
+      else {
         Serial.print(val);
-      } else {
-        if ( val == _sNL_ ) {
-          Serial.println("\n");
-        } else {
-          Serial.print(".");
+        if ( val != ';' ) {
+          Serial.print(" ");
+        }
+        else {
+          Serial.println("");
         }
       }
     }
@@ -146,4 +151,5 @@ void loop() {
     //  reset buffer index,  
     indx = 0;  inCount = 0; outCount = 0;  time_us = 0;
   }
+  
 }
