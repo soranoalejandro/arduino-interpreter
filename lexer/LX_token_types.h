@@ -5,6 +5,7 @@
 #define _sSTART_ 2    //  Start of file
 #define _sSTOP_ 3     //  End of file
 #define _sCMN_ 4      //  Comment or '/' math operator
+#define _sDE_ 5      //  # or @ decorator
 #define _sEQ_ 7       //  equal sign
 #define _sDOT_ 8      //  dot sign
 #define _sCM_ 9       //  comma

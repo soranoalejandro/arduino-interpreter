@@ -25,6 +25,7 @@
 #define _al_(x) (_lo_(x) || _up_(x))   //  letters -upper and lower case- range
 #define _an_(x) (_al_(x) || _nu_(x))   //  alphanumeric range -upper, lower and digits
 #define _id_sy_(x) ((x == us) || (x == ds)) //  extra JS id symbols '_' and '$'
+#define _de_sy_(x) ((x == at) || (x == ha)) //  extra JS decorator symbols '@' and '#'
 #define _ws_(x) ((x == sp) || (x == tb))    //  whitespace symbols
 #define _nl_(x) ((x == nl) || (x == cr))    //  new line symbols
 #define _stx_(x) (x == 2)                   //  start of text

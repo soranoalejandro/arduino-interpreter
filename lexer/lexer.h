@@ -23,9 +23,11 @@
 #define tkLateCodeData(t, d, n) {tk[indx++] = t;  daPass(d);  scanType = n;}    //  late code, data and next step to scan
 #define tkPass(t, d) {tk[indx++] = t;  daPass(d);  return t;}
 #define tkReduce(t) {tk[indx++] = t;  scanType = t;  return t;}
+#define tkRemove(t) {scanType = t;  return t;}
 #define tkCnt(t) {cnt = 0;  tk[indx++] = t; scanType = t;  return t;}
 //#define tkNumL(t, d) {tk[indx++] = t;  cnt = 0;  daStaE(d);  scanType = t;  return t;}
 #define tkNumL(t, d) {tk[indx++] = t;  cnt = 0;  scanType = t;  return t;}
+#define tkDeco(t, d) {tk[indx++] = t;  cnt = 0;  scanType = t;  return t;}
 
 #define tkStrL(t, q) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0; stop_c = q;  scanType = t;  return t;}
 
@@ -117,7 +119,7 @@ inline char lx_scan( char c ) {
       
       
       // not in prevoius list
-      // CMN 4    EQ 7      DOT 8        CM 9
+      // CMN 4    DE  5     EQ 7      DOT 8        CM 9
       if ( scanType < _sLC_ ) {
         //  other dubious operators _sCMN_  comments by example
         //  SLASH or COMMENT
@@ -126,11 +128,11 @@ inline char lx_scan( char c ) {
           //  without a stop character
           if ( stop_c == 0 ) {
             //  second char is slash
-            if ( c == sl ) {
-              scanType = _sUK_;
-              return;             //  single line comment
-            }
-            // comment in later   if ( c == sl ) tkWait( _sCMN_, nl )             //  single line comment
+//            if ( c == sl ) {
+//              //scanType = _sUK_;
+//              //return;             //  single line comment in arduino terminal mode
+//            }
+            if ( c == sl ) tkWait( _sCMN_, nl )             //  single line comment
             //  second char is asterisk, wait another asterisk
             if ( c == ak ) tkWait( _sCMN_, ak )             //  multiline comment
             //  was a single slash:
@@ -141,7 +143,6 @@ inline char lx_scan( char c ) {
           else {
             //  waiting new line
             if (stop_c == nl) {
-              Serial.print("wa L ");
               if ( _nl_(c) ) {
                 tkReduce( _sNL_ ) }                           //  new line
               else {
@@ -162,6 +163,9 @@ inline char lx_scan( char c ) {
                 tkWait( _sCMN_, ak ) }   //  ignore and wait another asterisk
             }
           }
+        }
+        if ( scanType == _sDE_ ) {
+          if ( _de_sy_(c)) return _sDE_;           //  @ or # decorator
         }
       }
     }
@@ -223,7 +227,8 @@ inline char lx_scan( char c ) {
       //  symbol 2 greater tha equal sign
       if ( c == gt ) tkPass( _sCMP_, c )    //  compare operator
       if ( c == qm ) tkCode( _sQST_ )       //  question mark
-      tkPass( _sSYM_, c )                   //  symbol 2, '@'
+      if ( c == at ) tkDeco( _sDE_, c )     //  '@' decorator   tkNumL( _sNUM_, c )   //  number literal
+      tkPass( _sSYM_, c )                   //  symbol 2
     }
 
     //  is symbol 1
@@ -248,11 +253,12 @@ inline char lx_scan( char c ) {
       if ( c == ds ) tkIdL( _sID_, c )      //  dollar sign, valid identifier
       if ( c == bg ) tkPass( _sBWO_, c )    //  '!' bitwise operator
       if ( c == pe ) tkPass( _sMTH_, c )    //  '%' basic math operator
-      tkPass( _sSYM_, c );                  //  symbol 1, '#'
+      if ( c == ha ) tkDeco( _sDE_, c )     //  '#' decorator   tkNumL( _sNUM_, c )   //  number literal
+      tkPass( _sSYM_, c );                  //  symbol 1
     }
     
     // is space or lower control character
-    if ( _ws_(c) ) tkReduce( _sWS_ )        //  white space
+    if ( _ws_(c) ) tkRemove( _sWS_ )        //  white space
     if ( _nl_(c) ) tkReduce( _sNL_ )        //  new line
     if ( _stx_(c) ) tkCode( _sSTART_ )      //  start of text
     if ( _etx_(c) ) tkCode( _sSTOP_ )       //  end of text
@@ -266,35 +272,38 @@ inline char lx_scan( char c ) {
 
 inline void lx_print_code( char code ) {
   switch (code) {
-    case _sLC_:  Serial.print("LC ");  break;
-    case _sUC_:  Serial.print("UC ");  break;
-    case _sID_:  Serial.print("ID ");  break;
-    case _sWS_:  Serial.print("WS ");  break;
-    case _sNL_:  Serial.print("NL ");  break;
+    case _sID_:  Serial.print("i");  break;
+    case _sLC_:  Serial.print("l");  break;
+    case _sUC_:  Serial.print("u");  break;
+    case _sWS_:  Serial.print("");  break;
+    case _sNL_:  Serial.println("");  break;
     case _sSE_:  Serial.print("");  break;
-    case _sNUM_:  Serial.print("NUM ");  break;
+    case _sNUM_:  Serial.print("n");  break;
 
-    case _sEQ_:  Serial.print("= ");  break;
+    case _sEQ_:  Serial.print("=");  break;
     case _sDOT_:  Serial.print(".");  break;
-    case _sCM_:  Serial.print(", ");  break;
+    case _sCM_:  Serial.print(",");  break;
     
     case _sSTR_:  break;
     case _sSTT_:  break;
-    case _sSTR_END_:  Serial.print("STR ");  break;
-    case _sBSL_:  Serial.print("BSL ");  break;
+    case _sSTR_END_:  Serial.print("STR");  break;
+    case _sBSL_:  Serial.print("BSL");  break;
 
-    case _sBWO_:  break;
-    case _sMTH_:  break;
-    case _sCMP_:  break;
-    case _sQST_:  Serial.print("? ");  break;
-    case _sCOL_:  Serial.print(": ");  break;
-    case _sSYM_:  Serial.print("SY ");  break;
-    case _sEXT_:  break;
+    case _sBWO_:  Serial.print("");  break;
+    case _sMTH_:  Serial.print("");  break;
+    case _sCMP_:  Serial.print("");  break;
+    case _sQST_:  Serial.print("?");  break;
+    case _sCOL_:  Serial.print(":");  break;
+    case _sSYM_:  Serial.print("s");  break;
+    case _sEXT_:  Serial.print("EXT ");  break;
+    
+      
     
     case _sSTART_:  Serial.print("\n__START__\n");  break;
     case _sSTOP_:  Serial.print("\n__STOP__\n");  break;
-    case _sCMN_:  Serial.print("CMN ");  break;
-    default :  Serial.print("UK: ");  Serial.print((byte)code);  Serial.print(" ");  break;
+    case _sCMN_:  Serial.print("CMN");  break;
+    case _sDE_:  Serial.print("d");  break;
+    default :  Serial.print("UK:");  Serial.print((byte)code);  Serial.print(" ");  break;
   }
   
   return;

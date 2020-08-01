@@ -51,46 +51,31 @@ char in, scan;
 
 void loop() {
   byte cc;
-  byte bu[30];
+  byte bu[70];
   cc = Serial.available();
-  if ( cc > 19 ) {
+  if ( cc ) {      ////  if ( cc > 19 ) {
     //  set bytes to load = 20. 
-    cc = 20;
+    ////cc = 20;
     //  add 20 to total in bytes counter
     inCount += cc;
-    //  load 20 incomming chars into a buffer
+    //  load incomming chars into a buffer
     for (byte i = 0; i < cc; i++) {
       bu[i] = (char)Serial.read();
     }
-    cc = 0;
-    stamp = micros();   //  record start time
+    // record start time
+    stamp = micros();
     //  MAIN SCAN INSTRUCTION
-    //  REPEATED 20 times mannually to ignore the small delay in for loops
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
-    lx_scan(bu[cc++]);
+    //byte ee = cc;
+    for (byte i = 0; i < cc; i++) {
+      lx_scan(bu[i]);
+    }
     //  record time of last character processeed
     lastChar = micros();
     elapsed = lastChar - stamp;
     //  add to incremental processing time value
     time_us += elapsed;
+
+    cc = 0;
     
     //  mark a new start (this time in milliseconds
     //  for the 400ms second automatic end of file detection
@@ -116,18 +101,18 @@ void loop() {
     for (unsigned int n = 0; (n < indx) ; n++) {
       val = tk[n];
       if ( val < 32) {
-        if ( ( val != _sWS_ ) && ( val != _sNL_ ) && ( val != _sCMN_ ) )
+        //if ( ( val != _sWS_ ) && ( val != _sNL_ ) /*&& ( val != _sCMN_ )*/ )
         
         lx_print_code(val);
       } 
       else {
         Serial.print(val);
-        if ( val != ';' ) {
-          Serial.print(" ");
-        }
-        else {
-          Serial.println("");
-        }
+        //if ( val != ';' ) {
+          //Serial.print(" ");
+        //}
+        //else {
+        //  Serial.println("");
+        //}
       }
     }
     outCount += indx;

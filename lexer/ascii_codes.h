@@ -37,6 +37,7 @@
 #define aa '&'    //  amperes and
 #define pi '|'    //  pipe
 #define ca '^'    //  caret
+#define ha '#'    //  at character
 #define at '@'    //  at character
 #define qm '?'    //  question mark
 #define ds '$'    //  dollar sign
