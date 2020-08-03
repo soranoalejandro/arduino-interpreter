@@ -1,15 +1,24 @@
-/* Function:
- * divides code sentences into lexeme tokens ex:
- *  'var x = 523' gives -> keyword(var), id(x), symbol(=), number literal(555)
- * it has two steps:  character SCAN, LEXER.
- * SCAN recognize basic character sequence types.
- * LEXER resolves ambigueties and reconstrucs lexemes with mixed
- * character sequences, ex: '1.23e-12' has numbers, dot and + - sign sequences
- *   Alejandro Solano, july 2020.
- */
-#include "ascii_and_variable_names.h"
-#include "keywordsJS.h"
-#include "LX_token_types.h"
+#ifdef ARDUINO > 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#endif
+#include "lexer.h"
+
+        //    VARIABLES
+
+
+static char data[14];
+static byte scanType = _sUK_;
+static byte cnt = 0;
+static byte Xor = 0;
+static byte Sum = 0;
+static char stop_c = 0;
+char tk[5000];      //  an ARRAY to hold generated -outgoing- data
+unsigned indx = 0;            //  current index of outgoing data buffer
+
+
+        //    MACROS
 
 //  repetitive instructions, need them to be INLINE FUNTIONS but arduino compiler still refuses
 #define daXorE(d) Xor ^= d;  Sum += d;  tk[indx++] = d;  ++cnt
@@ -35,23 +44,9 @@
 #define tkIdL(t, d) {tk[indx++] = t;  cnt = 0;  Xor = 0;  Sum = 0;  scanType = t;  return t;}
 
 
-static char data[14];
-static byte scanType = _sUK_;
-static byte cnt = 0;
-static byte Xor = 0;
-static byte Sum = 0;
-static char stop_c = 0;
 
-        //    FUNCTIONS
 
-//  SCAN function
-inline char lx_scan( char c );
-//  SCAN function code to string (for testing and debuggin purposes)
-inline void lx_print_code( char c );
 
-// _sLC_ 10        _sUC_ 11        _sID_ 12
-// _sWS_ 13        _sNL_ 14        _sSE_ 15
-// _sNUM_ 16       _sSTR_ 17       _sSTR_END_ 18     _sSTT_ 19        _sBSL_ 20
         //    FUNCTION DEFINITIONS
 
 inline char lx_scan( char c ) {
@@ -267,44 +262,4 @@ inline char lx_scan( char c ) {
   }
   //  character hex 00
   return _sUK_;
-}
-
-
-inline void lx_print_code( char code ) {
-  switch (code) {
-    case _sID_:  Serial.print("i");  break;
-    case _sLC_:  Serial.print("l");  break;
-    case _sUC_:  Serial.print("u");  break;
-    case _sWS_:  Serial.print("");  break;
-    case _sNL_:  Serial.println("");  break;
-    case _sSE_:  Serial.print("");  break;
-    case _sNUM_:  Serial.print("n");  break;
-
-    case _sEQ_:  Serial.print("=");  break;
-    case _sDOT_:  Serial.print(".");  break;
-    case _sCM_:  Serial.print(",");  break;
-    
-    case _sSTR_:  break;
-    case _sSTT_:  break;
-    case _sSTR_END_:  Serial.print("STR");  break;
-    case _sBSL_:  Serial.print("BSL");  break;
-
-    case _sBWO_:  Serial.print("");  break;
-    case _sMTH_:  Serial.print("");  break;
-    case _sCMP_:  Serial.print("");  break;
-    case _sQST_:  Serial.print("?");  break;
-    case _sCOL_:  Serial.print(":");  break;
-    case _sSYM_:  Serial.print("s");  break;
-    case _sEXT_:  Serial.print("EXT ");  break;
-    
-      
-    
-    case _sSTART_:  Serial.print("\n__START__\n");  break;
-    case _sSTOP_:  Serial.print("\n__STOP__\n");  break;
-    case _sCMN_:  Serial.print("CMN");  break;
-    case _sDE_:  Serial.print("d");  break;
-    default :  Serial.print("UK:");  Serial.print((byte)code);  Serial.print(" ");  break;
-  }
-  
-  return;
 }

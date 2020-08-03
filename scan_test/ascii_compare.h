@@ -1,7 +1,7 @@
+#pragma once
 #include "ascii_codes.h"
 
-        //    MACROS
-//  the names implies LIMITS between character gropus in ascii start, ex:
+//  the names implies LIMITS between character groups in ascii, ex:
 //  _Ad_ implies the limmit between Upercase A range and digit 9 range
 //  the condition gives true for the first element in its name, A inthe example above
 #define _aA_(c) (c > '`')   //  a lower case start

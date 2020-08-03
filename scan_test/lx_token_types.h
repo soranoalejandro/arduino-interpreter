@@ -1,4 +1,4 @@
-
+#pragma once
 //  return values of SCAN and LEXER functions
 
 #define _sUK_ 0       //  Unknown character

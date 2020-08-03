@@ -1,3 +1,4 @@
+#pragma once
 /* shortnames for the characters that the lexer
  * will recognize form the input language
  */

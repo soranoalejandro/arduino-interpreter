@@ -1,3 +1,4 @@
+#pragma once
   // RESERVED
 #define _k20 "if"
 #define _k40 "else"
